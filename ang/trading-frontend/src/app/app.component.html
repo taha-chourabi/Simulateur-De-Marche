@@ -1,0 +1,89 @@
+<div class="main-container">
+  <h1>Trading Dashboard</h1>
+
+  <!-- Formulaire -->
+  <div class="card">
+    <form (ngSubmit)="placeOrder($event)">
+
+      <div>
+        <label>Ticker</label>
+        <select [(ngModel)]="form.ticker" name="ticker" required>
+          <option *ngFor="let s of symbols" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Side</label>
+        <select [(ngModel)]="form.side" name="side" required>
+          <option>BUY</option>
+          <option>SELL</option>
+          <option>CALL</option>
+          <option>PUT</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Quantité</label>
+        <input type="number" [(ngModel)]="form.quantity" name="quantity" min="1" />
+      </div>
+
+      <div>
+        <label>Limit/Strike</label>
+        <input type="number" [(ngModel)]="form.limitPrice" name="limitPrice" />
+      </div>
+
+      <button type="submit">Passer l’ordre</button>
+    </form>
+  </div>
+
+  <!-- Quotes -->
+  <div class="card">
+    <h2>Quotes</h2>
+    <table>
+      <thead>
+        <tr><th>Ticker</th><th>Prix</th><th>TS</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let q of quotes">
+          <td>{{ q.ticker }}</td>
+          <td>{{ q.price | number:'1.2-2' }}</td>
+          <td>{{ q.ts }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Ordres -->
+  <div class="card">
+    <h2>Ordres</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Ticker</th><th>Side</th><th>Qty</th><th>Limit</th>
+          <th>PnL</th><th>BE</th><th>Max+</th><th>Max−</th><th>Gain %</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of orders">
+          <td>{{ o.id }}</td>
+          <td>{{ o.ticker }}</td>
+          <td [ngClass]="{'text-green': o.side==='BUY'||o.side==='CALL', 'text-red': o.side==='SELL'||o.side==='PUT'}">{{ o.side }}</td>
+          <td>{{ o.quantity }}</td>
+          <td>{{ o.limitPrice ?? '-' }}</td>
+          <td [ngClass]="{'text-green': (o.pnl ?? 0)>=0, 'text-red': (o.pnl ?? 0)<0}">{{ o.pnl | number:'1.2-2' }}</td>
+          <td>{{ o.breakeven ?? '-' }}</td>
+          <td>{{ o.maxProfit }}</td>
+          <td>{{ o.maxLoss }}</td>
+          <td>{{ o.gainMarginPct ? (o.gainMarginPct | number:'1.0-2')+' %' : '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- Graphique des prix -->
+<div class="card">
+  <h2>Graphique en temps réel</h2>
+<app-price-chart [ticker]="form.ticker || 'AAPL'"></app-price-chart>
+</div>
+
+
+  </div>
+</div>

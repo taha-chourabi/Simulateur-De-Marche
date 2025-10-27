@@ -1,0 +1,121 @@
+/* ---- RESET + BASE ---- */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+/* ---- CONTAINER ---- */
+.min-h-screen {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ---- TITLES ---- */
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #1d4ed8;
+  margin-bottom: 24px;
+}
+h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* ---- CARD ---- */
+.bg-white {
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+/* ---- FORM ---- */
+form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+/* ---- BUTTON ---- */
+button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #1e40af;
+}
+
+/* ---- TABLE ---- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead {
+  background-color: #1f2937;
+  color: white;
+}
+
+thead th {
+  padding: 8px;
+  text-align: center;
+}
+
+tbody td {
+  padding: 8px;
+  text-align: center;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #f9fafb;
+}
+
+tbody tr:hover {
+  background-color: #e0f2fe;
+  transition: background-color 0.2s;
+}
+
+/* ---- COLORS ---- */
+.text-green {
+  color: #16a34a;
+}
+.text-red {
+  color: #dc2626;
+}
