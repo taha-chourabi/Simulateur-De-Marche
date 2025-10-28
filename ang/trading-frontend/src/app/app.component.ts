@@ -6,13 +6,18 @@ import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { PriceChartComponent } from './chart.component';
 
-
-
 type Quote = { ticker: string; price: number; ts: string };
-type Side = 'BUY' | 'SELL' | 'PUT' | 'CALL';
+type Side =
+  | 'BUY'
+  | 'SELL'
+  | 'PUT'
+  | 'CALL'
+  | 'STRADDLE'
+  | 'STRANGLE'
+  | 'SPREAD';
 type Status = 'NEW' | 'FILLED' | 'REJECTED';
 
-type Order = {
+interface Order {
   id: number;
   user: string;
   ticker: string;
@@ -27,16 +32,20 @@ type Order = {
   pnl?: number;
   maxProfit?: number | '∞';
   maxLoss?: number | '∞';
-  breakeven?: number;
   gainMarginPct?: number;
-};
+  stopLoss?: number;
+  takeProfit?: number;
+  breakeven?: number | string;
+  beLow?: number;
+  beHigh?: number;
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule,PriceChartComponent],
+  imports: [CommonModule, FormsModule, HttpClientModule, PriceChartComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit, OnDestroy {
   symbols: string[] = [];
@@ -48,9 +57,12 @@ export class AppComponent implements OnInit, OnDestroy {
     user: 'alice',
     ticker: '',
     side: 'BUY',
-    quantity: 1
+    quantity: undefined,
+    stopLoss: undefined,
+    takeProfit: undefined,
   };
 
+  selectedOrder?: Order;
   isSubmitting = false;
 
   constructor(private http: HttpClient) {}
@@ -66,62 +78,70 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private loadSymbols() {
-    this.http.get<string[]>('/api/symbols').subscribe(syms => {
-      this.symbols = syms;
-      if (!this.form.ticker && syms.length) this.form.ticker = syms[0];
+    this.http.get<string[]>('/api/symbols').subscribe({
+      next: (syms) => {
+        this.symbols = syms ?? [];
+        if (!this.form.ticker && this.symbols.length)
+          this.form.ticker = this.symbols[0];
+      },
+      error: (_) => {
+        this.symbols = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN'];
+        if (!this.form.ticker) this.form.ticker = this.symbols[0];
+      },
     });
   }
 
   private loadOrders() {
-    this.http.get<Order[]>('/api/orders').subscribe(list => {
+    this.http.get<Order[]>('/api/orders').subscribe((list) => {
       this.orders = list;
       this.recompute();
     });
   }
 
-  // --- correction ici ---
   placeOrder(event?: Event) {
     if (event) event.preventDefault();
     if (this.isSubmitting) return;
+
+    if (!this.form.quantity || this.form.quantity <= 0) {
+      alert('Quantité invalide');
+      return;
+    }
+
     this.isSubmitting = true;
 
     const body = {
       user: this.form.user ?? 'alice',
       ticker: this.form.ticker!,
       side: this.form.side as Side,
-      quantity: Number(this.form.quantity ?? 1),
+      quantity: Number(this.form.quantity),
       limitPrice: this.form.limitPrice ?? null,
       strike: this.form.strike ?? this.form.limitPrice ?? null,
-      premium: this.form.premium ?? null
+      premium: this.form.premium ?? null,
+      stopLoss: this.form.stopLoss ?? null,
+      takeProfit: this.form.takeProfit ?? null,
     };
 
-    // on NE met plus l’ordre ici pour éviter le doublon
     this.http.post<Order>('/api/orders', body).subscribe({
       next: () => {
-        console.log('✅ Ordre envoyé, en attente du WS');
+        console.log('✅ Ordre envoyé');
         this.isSubmitting = false;
       },
-      error: () => (this.isSubmitting = false)
+      error: () => (this.isSubmitting = false),
     });
   }
-  // --- fin correction ---
 
   private connectWs() {
     this.stomp = new Client({
       webSocketFactory: () => new SockJS('/ws'),
       reconnectDelay: 5000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
-      debug: (msg) => console.log('[STOMP]', msg)
     });
 
     this.stomp.onConnect = () => {
-      console.log('✅ WebSocket connecté');
-
       this.stomp?.subscribe('/topic/quotes', (msg: IMessage) => {
         const q: Quote = JSON.parse(msg.body);
-        const i = this.quotes.findIndex(x => x.ticker === q.ticker);
-        if (i >= 0) this.quotes[i] = q; else this.quotes.push(q);
+        const i = this.quotes.findIndex((x) => x.ticker === q.ticker);
+        if (i >= 0) this.quotes[i] = q;
+        else this.quotes.push(q);
         this.quotes = [...this.quotes];
         this.recompute();
       });
@@ -133,75 +153,109 @@ export class AppComponent implements OnInit, OnDestroy {
       });
     };
 
-    this.stomp.onWebSocketClose = () => {
-      console.warn('🔌 WebSocket fermé, tentative de reconnexion...');
-    };
-
     this.stomp.activate();
   }
 
   private recompute() {
-    const S: Record<string, number> = Object.fromEntries(
-      this.quotes.map(q => [q.ticker, q.price])
+    const prices: Record<string, number> = Object.fromEntries(
+      this.quotes.map((q) => [q.ticker, q.price])
     );
-    this.orders = this.orders.map(o => this.computeOrder(o, S[o.ticker] ?? NaN));
+    this.orders = this.orders.map((o) =>
+      this.computeOrder(o, prices[o.ticker] ?? NaN)
+    );
   }
 
   private computeOrder(o: Order, spot: number): Order {
     const Q = o.quantity ?? 0;
     const K = o.strike ?? o.limitPrice ?? NaN;
-    const premium = o.premium ?? 0;
+    const P = o.premium ?? 0;
 
-    if (o.side === 'BUY') {
-      const cost = o.limitPrice ?? spot;
-      o.pnl = isFinite(spot) ? (spot - cost) * Q : 0;
-      o.breakeven = cost;
-      o.maxProfit = '∞';
-      o.maxLoss = isFinite(cost) ? -cost * Q : undefined;
-      o.gainMarginPct = isFinite(spot) && spot !== 0
-        ? ((spot - cost) / spot) * 100
-        : undefined;
-      return o;
-    }
+    switch (o.side) {
+      case 'BUY': {
+        const cost = o.limitPrice ?? spot;
+        o.pnl = (spot - cost) * Q;
+        o.breakeven = cost;
+        o.maxProfit = '∞';
+        o.maxLoss = -cost * Q;
+        break;
+      }
 
-    if (o.side === 'SELL') {
-      const sellPx = o.limitPrice ?? spot;
-      o.pnl = isFinite(spot) ? (sellPx - spot) * Q : 0;
-      o.breakeven = sellPx;
-      o.maxProfit = isFinite(sellPx) ? sellPx * Q : undefined;
-      o.maxLoss = '∞';
-      o.gainMarginPct = isFinite(sellPx) && sellPx !== 0
-        ? ((sellPx - spot) / sellPx) * 100
-        : undefined;
-      return o;
-    }
+      case 'SELL': {
+        const px = o.limitPrice ?? spot;
+        o.pnl = (px - spot) * Q;
+        o.breakeven = px;
+        o.maxProfit = px * Q;
+        o.maxLoss = '∞';
+        break;
+      }
 
-    if (o.side === 'CALL') {
-      const k = isFinite(K) ? K : 0;
-      const intrinsic = isFinite(spot) ? Math.max(spot - k, 0) : 0;
-      o.pnl = (intrinsic - premium) * Q;
-      o.breakeven = k + premium;
-      o.maxProfit = '∞';
-      o.maxLoss = -premium * Q;
-      o.gainMarginPct = premium !== 0
-        ? ((intrinsic - premium) / Math.abs(premium)) * 100
-        : undefined;
-      return o;
-    }
+      case 'CALL': {
+        const intrinsic = Math.max(spot - K, 0);
+        o.pnl = (intrinsic - P) * Q;
+        o.breakeven = K + P;
+        o.maxProfit = '∞';
+        o.maxLoss = -P * Q;
+        break;
+      }
 
-    if (o.side === 'PUT') {
-      const k = isFinite(K) ? K : 0;
-      const intrinsic = isFinite(spot) ? Math.max(k - spot, 0) : 0;
-      o.pnl = (intrinsic - premium) * Q;
-      o.breakeven = k - premium;
-      o.maxProfit = k * Q - premium * Q;
-      o.maxLoss = -premium * Q;
-      o.gainMarginPct = premium !== 0
-        ? ((intrinsic - premium) / Math.abs(premium)) * 100
-        : undefined;
-      return o;
+      case 'PUT': {
+        const intrinsic = Math.max(K - spot, 0);
+        o.pnl = (intrinsic - P) * Q;
+        o.breakeven = K - P;
+        o.maxProfit = (K - P) * Q;
+        o.maxLoss = -P * Q;
+        break;
+      }
+
+      case 'STRADDLE': {
+        const intrinsicCall = Math.max(spot - K, 0);
+        const intrinsicPut = Math.max(K - spot, 0);
+        const total = intrinsicCall + intrinsicPut;
+        o.pnl = (total - 2 * P) * Q;
+        o.beLow = K - P;
+        o.beHigh = K + P;
+        o.breakeven = `${o.beLow.toFixed(2)} / ${o.beHigh.toFixed(2)}`;
+        o.maxProfit = '∞';
+        o.maxLoss = -2 * P * Q;
+        break;
+      }
+
+      case 'STRANGLE': {
+        const kPut = K * 0.98,
+          kCall = K * 1.02;
+        const total = Math.max(spot - kCall, 0) + Math.max(kPut - spot, 0);
+        o.pnl = (total - 2 * P) * Q;
+        o.beLow = kPut - P;
+        o.beHigh = kCall + P;
+        o.breakeven = `${o.beLow.toFixed(2)} / ${o.beHigh.toFixed(2)}`;
+        o.maxProfit = '∞';
+        o.maxLoss = -2 * P * Q;
+        break;
+      }
+
+      case 'SPREAD': {
+        const kHigh = K * 1.05;
+        const spread = Math.max(spot - K, 0) - Math.max(spot - kHigh, 0);
+        o.pnl = (spread - P) * Q;
+        o.breakeven = K + P;
+        o.maxProfit = (kHigh - K - P) * Q;
+        o.maxLoss = -P * Q;
+        break;
+      }
     }
 
     return o;
+  }
+
+  selectOrder(o: Order) {
+    this.selectedOrder = o;
+  }
+
+  deleteOrder(o: Order, e: Event) {
+    e.stopPropagation();
+    if (confirm(`Supprimer l’ordre #${o.id}?`)) {
+      this.orders = this.orders.filter((x) => x.id !== o.id);
+      if (this.selectedOrder?.id === o.id) this.selectedOrder = undefined;
+    }
   }
 }

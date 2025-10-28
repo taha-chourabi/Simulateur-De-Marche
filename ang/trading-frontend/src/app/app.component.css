@@ -117,3 +117,96 @@ tbody tr:hover {
 .text-red {
   color: #dc2626;
 }
+tr.selected {
+  background-color: #035895;
+  font-weight: 600;
+}
+tr:hover {
+  cursor: pointer;
+  background-color: #f1f8e9;
+}
+/* === Taille et disposition optimisées === */
+
+.main-container {
+  width: 95%;
+  max-width: 1300px;
+}
+
+/* Table bien alignée et centrée */
+.card table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+th, td {
+  padding: 10px 8px;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+}
+
+thead th {
+  background-color: #1f2937;
+  color: white;
+  font-weight: 600;
+}
+
+/* Empêche le tableau de se compresser */
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* === Centrage du graphique === */
+.chart-card {
+  width: 80%;               /* Taille du conteneur */
+  max-width: 900px;         /* Largeur max */
+  height: 500px;            /* Hauteur */
+  margin: 40px auto;        /* <-- centre horizontalement */
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* centre le contenu */
+  justify-content: center;
+}
+
+.chart-card h2 {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #8c98b3;
+}
+
+app-price-chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 850px;
+}
+
+/* Amélioration de la sélection */
+tr.selected {
+  background-color: #a9d1ee;
+  font-weight: 600;
+}
+
+tr:hover {
+  cursor: pointer;
+  background-color: #f1f8e9;
+}
+.btn-delete {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+.btn-delete:hover {
+  background-color: #b91c1c;
+}

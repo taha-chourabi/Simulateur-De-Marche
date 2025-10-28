@@ -32,4 +32,6 @@ public class OrderController {
 
     @GetMapping
     public List<Order> all(){ return svc.all(); }
+
 }
+

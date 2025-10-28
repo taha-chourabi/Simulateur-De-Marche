@@ -71,4 +71,12 @@ export class PriceChartComponent implements AfterViewInit, OnDestroy {
     this.stomp?.deactivate();
     this.chart.remove();
   }
+  ngOnChanges(): void {
+  if (this.chart && this.lineSeries) {
+    this.data = [];
+    this.lineSeries.setData([]);
+    console.log(`🔄 Nouveau ticker sélectionné : ${this.ticker}`);
+  }
+}
+
 }

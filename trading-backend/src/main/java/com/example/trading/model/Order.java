@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 public class Order {
-    public enum Side { BUY, SELL, PUT, CALL }
+    public enum Side { BUY, SELL, PUT, CALL, STRADDLE, STRANGLE, SPREAD }
+
     public enum Status { NEW, FILLED, REJECTED }
 
     private long id;
