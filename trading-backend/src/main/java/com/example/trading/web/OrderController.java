@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class OrderController {
 
     @GetMapping
     public List<Order> all(){ return svc.all(); }
+
+
 
 }
 

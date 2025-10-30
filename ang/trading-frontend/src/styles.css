@@ -119,3 +119,9 @@ tbody tr:hover {
 .text-red {
   color: #dc2626;
 }
+.card.chart-card { padding: 0; }
+.card.chart-card .chart-wrap { height: 460px; }
+
+@media (min-width: 1024px) {
+  .card.chart-card { margin-left: auto; margin-right: auto; max-width: 1100px; }
+}

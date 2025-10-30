@@ -1,9 +1,14 @@
 import './polyfills';
-import 'zone.js'; // ✅ nécessaire pour NG0908
+import 'zone.js';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { AppComponent } from './app/app.component';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
+import { ShellComponent } from './app/shell.component';
 
-bootstrapApplication(AppComponent, {
-  providers: [provideHttpClient(withFetch())],
+bootstrapApplication(ShellComponent, {
+  providers: [
+    provideHttpClient(withFetch()),
+    provideRouter(routes),
+  ],
 }).catch(err => console.error(err));

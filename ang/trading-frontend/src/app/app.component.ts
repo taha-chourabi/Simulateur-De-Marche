@@ -5,6 +5,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { PriceChartComponent } from './chart.component';
+import { RouterModule } from '@angular/router'; // ✅ nécessaire
+
 
 type Quote = { ticker: string; price: number; ts: string };
 type Side =
@@ -43,7 +45,7 @@ interface Order {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, PriceChartComponent],
+  imports: [CommonModule, FormsModule, HttpClientModule, PriceChartComponent , RouterModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
@@ -98,37 +100,48 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  placeOrder(event?: Event) {
-    if (event) event.preventDefault();
-    if (this.isSubmitting) return;
+placeOrder(event?: Event) {
+  if (event) event.preventDefault();
+  if (this.isSubmitting) return;
 
-    if (!this.form.quantity || this.form.quantity <= 0) {
-      alert('Quantité invalide');
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    const body = {
-      user: this.form.user ?? 'alice',
-      ticker: this.form.ticker!,
-      side: this.form.side as Side,
-      quantity: Number(this.form.quantity),
-      limitPrice: this.form.limitPrice ?? null,
-      strike: this.form.strike ?? this.form.limitPrice ?? null,
-      premium: this.form.premium ?? null,
-      stopLoss: this.form.stopLoss ?? null,
-      takeProfit: this.form.takeProfit ?? null,
-    };
-
-    this.http.post<Order>('/api/orders', body).subscribe({
-      next: () => {
-        console.log('✅ Ordre envoyé');
-        this.isSubmitting = false;
-      },
-      error: () => (this.isSubmitting = false),
-    });
+  if (!this.form.quantity || this.form.quantity <= 0) {
+    alert('Quantité invalide');
+    return;
   }
+
+  this.isSubmitting = true;
+
+  const body = {
+    user: this.form.user ?? 'alice',
+    ticker: this.form.ticker!,
+    side: this.form.side as Side,
+    quantity: Number(this.form.quantity),
+    limitPrice: this.form.limitPrice ?? undefined,
+    strike: this.form.strike ?? this.form.limitPrice ?? undefined,
+    premium: this.form.premium ?? undefined,
+  };
+
+  this.http.post<Order>('/api/orders', body).subscribe({
+    next: (o) => {
+      // ✅ Conserve les champs stopLoss et takeProfit saisis dans le formulaire
+      o.stopLoss = this.form.stopLoss;
+      o.takeProfit = this.form.takeProfit;
+
+      // ✅ Évite les doublons (remplace l'ordre si déjà présent)
+      this.orders = [o, ...this.orders.filter(x => x.id !== o.id)];
+
+      // ✅ Met à jour le calcul local
+      this.recompute();
+
+      this.isSubmitting = false;
+      console.log('✅ Ordre ajouté avec Stop Loss et Take Profit');
+    },
+    error: () => (this.isSubmitting = false),
+  });
+}
+
+
+
 
   private connectWs() {
     this.stomp = new Client({
@@ -221,8 +234,8 @@ export class AppComponent implements OnInit, OnDestroy {
       }
 
       case 'STRANGLE': {
-        const kPut = K * 0.98,
-          kCall = K * 1.02;
+        const kPut = K * 0.98;
+        const kCall = K * 1.02;
         const total = Math.max(spot - kCall, 0) + Math.max(kPut - spot, 0);
         o.pnl = (total - 2 * P) * Q;
         o.beLow = kPut - P;
@@ -242,6 +255,36 @@ export class AppComponent implements OnInit, OnDestroy {
         o.maxLoss = -P * Q;
         break;
       }
+    }
+
+    // === Stop Loss & Take Profit logic ===
+    if (isFinite(spot)) {
+      if (o.stopLoss != null) {
+        if ((o.side === 'BUY' || o.side === 'CALL') && spot <= o.stopLoss) {
+          o.status = 'FILLED';
+          o.pnl = (o.stopLoss - (o.limitPrice ?? o.stopLoss)) * o.quantity;
+        }
+        if ((o.side === 'SELL' || o.side === 'PUT') && spot >= o.stopLoss) {
+          o.status = 'FILLED';
+          o.pnl = ((o.limitPrice ?? spot) - o.stopLoss) * o.quantity;
+        }
+      }
+
+      if (o.takeProfit != null) {
+        if ((o.side === 'BUY' || o.side === 'CALL') && spot >= o.takeProfit) {
+          o.status = 'FILLED';
+          o.pnl = (o.takeProfit - (o.limitPrice ?? o.takeProfit)) * o.quantity;
+        }
+        if ((o.side === 'SELL' || o.side === 'PUT') && spot <= o.takeProfit) {
+          o.status = 'FILLED';
+          o.pnl = ((o.limitPrice ?? spot) - o.takeProfit) * o.quantity;
+        }
+      }
+    }
+
+    // === Gain % calculation ===
+    if (isFinite(spot) && spot !== 0 && o.limitPrice) {
+      o.gainMarginPct = ((spot - o.limitPrice) / o.limitPrice) * 100;
     }
 
     return o;

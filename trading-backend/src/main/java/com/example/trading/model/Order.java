@@ -16,6 +16,10 @@ public class Order {
     private Side side;
     private Status status;
     private Instant ts;
+    private BigDecimal stopLoss;
+    private BigDecimal takeProfit;
+    private BigDecimal gainMarginPct;
+
 
     public Order(long id, String user, String ticker, int quantity, BigDecimal limitPrice, Side side, Status status, Instant ts) {
         this.id = id;
@@ -36,6 +40,16 @@ public class Order {
     public Side getSide() { return side; }
     public Status getStatus() { return status; }
     public Instant getTs() { return ts; }
+
+
+    public BigDecimal getGainMarginPct() { return gainMarginPct; }
+    public void setGainMarginPct(BigDecimal gainMarginPct) { this.gainMarginPct = gainMarginPct; }
+
+    public BigDecimal getStopLoss() { return stopLoss; }
+    public void setStopLoss(BigDecimal stopLoss) { this.stopLoss = stopLoss; }
+
+    public BigDecimal getTakeProfit() { return takeProfit; }
+    public void setTakeProfit(BigDecimal takeProfit) { this.takeProfit = takeProfit; }
 
     public void setStatus(Status status) { this.status = status; }
 }

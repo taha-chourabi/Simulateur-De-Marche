@@ -1,0 +1,152 @@
+/* ====== GLOBAL CONTAINER ====== */
+.crypto-container {
+  max-width: 950px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #0b0f19;
+  border-radius: 16px;
+  color: #f5f7fa;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ====== TITLE ====== */
+.crypto-container h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #00ffb0;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 255, 176, 0.4);
+}
+
+/* ====== CONTROLS / FORM ====== */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  background: #121826;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.controls label {
+  display: block;
+  font-size: 0.9rem;
+  color: #b5bcc7;
+  margin-bottom: 6px;
+}
+
+.controls select,
+.controls input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #1a2033;
+  border: 1px solid #2e364d;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.controls select:focus,
+.controls input:focus {
+  border-color: #00ffb0;
+  outline: none;
+}
+
+/* ====== BUTTON ====== */
+.controls button {
+  background: linear-gradient(90deg, #00ffb0, #00b3ff);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s;
+  color: #0b0f19;
+  margin-top: 22px;
+}
+
+.controls button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* ====== TABLE ====== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #121826;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 0.95rem;
+}
+
+thead {
+  background: #1a2033;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  text-align: center;
+}
+
+th {
+  color: #7f8aa3;
+  font-weight: 500;
+  border-bottom: 1px solid #2e364d;
+}
+
+td {
+  color: #0562ed;
+  border-bottom: 1px solid #1c2335;
+}
+
+/* ====== ROW COLORS ====== */
+tr:hover {
+  background: rgba(0, 255, 176, 0.08);
+}
+
+.buy {
+  color: #00ffb0;
+  font-weight: bold;
+}
+
+.sell {
+  color: #ff4d4d;
+  font-weight: bold;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 600px) {
+  .crypto-container {
+    margin: 15px;
+    padding: 20px;
+  }
+
+  th,
+  td {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+}
+
+/* ====== RETURN BUTTON ====== */
+.back-btn {
+  display: inline-block;
+  margin-bottom: 25px;
+  background: transparent;
+  border: 1px solid #00ffb0;
+  color: #00ffb0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #00ffb0;
+  color: #0b0f19;
+}

@@ -1,212 +1,186 @@
 body {
-  margin: 0;
+  background: #0d1117;
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  background-color: #f4f6f9;
-  color: #1f2937;
+  color: #f5f5f5;
+  margin: 0;
 }
 
-.main-container {
-  min-height: 100vh;
-  padding: 32px;
+.dashboard-container {
   max-width: 1200px;
   margin: auto;
+  padding: 40px 20px;
 }
 
-h1 {
+.title {
   text-align: center;
-  color: #1d4ed8;
-  font-size: 2rem;
+  color: #4ea1ff;
+  font-size: 2.4rem;
   font-weight: 700;
   margin-bottom: 30px;
+  text-shadow: 0 0 10px rgba(78, 161, 255, 0.6);
 }
 
-h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #111827;
-}
-
+/* --- CARDS --- */
 .card {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  background: #161b22;
+  border-radius: 15px;
   padding: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  border: 1px solid #30363d;
 }
 
-form {
+.card h2 {
+  margin-bottom: 15px;
+  color: #00b3ff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+}
+
+/* --- FORMULAIRE --- */
+.form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
   align-items: end;
 }
 
 label {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.9rem;
   margin-bottom: 4px;
-  display: block;
+  color: #d1d5db;
 }
 
 input,
 select {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background: #0e131a;
+  color: #e5e7eb;
+  transition: 0.2s;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 3px #60a5fa;
+  border-color: #4ea1ff;
+  box-shadow: 0 0 5px #4ea1ff;
 }
 
 button {
-  padding: 10px 14px;
-  background-color: #2563eb;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 600;
+}
+
+/* --- Bouton principal --- */
+.submit-cell button {
+  padding: 10px 16px;
+  background: linear-gradient(90deg, #0078ff, #00b3ff);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.25s;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 179, 255, 0.4);
 }
 
-button:hover {
-  background-color: #1d4ed8;
+.submit-cell button:hover {
+  background: linear-gradient(90deg, #00b3ff, #0078ff);
+  transform: scale(1.05);
 }
 
+/* --- TABLES --- */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
   font-size: 0.9rem;
 }
 
 thead {
-  background-color: #1f2937;
-  color: white;
+  background: #1e2630;
+  color: #00b3ff;
 }
 
 th,
 td {
   text-align: center;
-  padding: 8px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 8px;
+  border-bottom: 1px solid #2d3641;
 }
 
-tbody tr:nth-child(odd) {
-  background-color: #f9fafb;
+/* ✅ cellules plus claires */
+tbody tr {
+  background-color: #1e2630;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #252e3b;
 }
 
 tbody tr:hover {
-  background-color: #eff6ff;
-  transition: background 0.2s;
+  background-color: #313b49;
 }
 
-.text-green {
-  color: #16a34a;
-}
-
-.text-red {
-  color: #dc2626;
-}
-tr.selected {
-  background-color: #035895;
+th {
   font-weight: 600;
-}
-tr:hover {
-  cursor: pointer;
-  background-color: #f1f8e9;
-}
-/* === Taille et disposition optimisées === */
-
-.main-container {
-  width: 95%;
-  max-width: 1300px;
-}
-
-/* Table bien alignée et centrée */
-.card table {
-  table-layout: fixed;
-  width: 100%;
-}
-
-th, td {
-  padding: 10px 8px;
   font-size: 0.9rem;
-  word-wrap: break-word;
+  letter-spacing: 0.5px;
 }
 
-thead th {
-  background-color: #1f2937;
-  color: white;
-  font-weight: 600;
+td {
+  color: #e0e0e0;
 }
 
-/* Empêche le tableau de se compresser */
-.table-wrapper {
-  overflow-x: auto;
-  width: 100%;
-  margin-bottom: 16px;
+.selected {
+  background-color: #0c356a !important;
+  font-weight: bold;
 }
 
-/* === Centrage du graphique === */
-.chart-card {
-  width: 80%;               /* Taille du conteneur */
-  max-width: 900px;         /* Largeur max */
-  height: 500px;            /* Hauteur */
-  margin: 40px auto;        /* <-- centre horizontalement */
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;      /* centre le contenu */
-  justify-content: center;
-}
+/* --- COULEURS --- */
+.text-green { color: #00e676; }
+.text-red { color: #ff5252; }
+.text-blue { color: #4ea1ff; }
 
-.chart-card h2 {
-  text-align: center;
-  margin-bottom: 12px;
-  font-size: 1.2rem;
-  color: #8c98b3;
-}
-
-app-price-chart {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 850px;
-}
-
-/* Amélioration de la sélection */
-tr.selected {
-  background-color: #a9d1ee;
-  font-weight: 600;
-}
-
-tr:hover {
-  cursor: pointer;
-  background-color: #f1f8e9;
-}
+/* --- BOUTON SUPPRIMER --- */
 .btn-delete {
-  background-color: #dc2626;
-  color: white;
+  background: #ff4d4d;
   border: none;
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background-color 0.2s;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  transition: 0.2s;
 }
+
 .btn-delete:hover {
-  background-color: #b91c1c;
+  background: #ff0000;
+  transform: scale(1.05);
+}
+
+/* --- CHART --- */
+.chart-card {
+  padding: 16px;
+  background: #0e131a;
+}
+
+/* --- BOUTON CRYPTO --- */
+.crypto-btn {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  background: linear-gradient(90deg, #ffc107, #ff9800);
+  color: #111;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.4);
+}
+
+.crypto-btn:hover {
+  background: linear-gradient(90deg, #ff9800, #ffc107);
+  transform: scale(1.05);
 }
